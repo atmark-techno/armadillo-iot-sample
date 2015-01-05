@@ -1,4 +1,4 @@
 armadillo-iot-sample
 ====================
 
-Sample source code for Armadillo-IoT
+近日公開予定
