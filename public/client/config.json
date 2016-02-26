@@ -1,0 +1,8 @@
+{
+   "host": "http://armadillo-iot-sample.herokuapp.com",
+   "user": "username",
+   "password": "password",
+   "token": "12345",
+   "pusher_key": "511fdf1fe94f9c8458e4",
+   "pusher_secret": "80d6188fa28be77a7e9a"
+}

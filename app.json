@@ -1,0 +1,10 @@
+{
+  "name": "IoT Gateway Sample Code",
+  "description": " Node.js app using Express 4",
+  "repository": "https://github.com/atmark-techno/armadillo-iot-sample",
+  "addons": [
+    "pusher:sandbox",
+    "sendgrid:starter",
+    "heroku-postgresql:hobby-dev"
+  ]
+}
