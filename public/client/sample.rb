@@ -7,25 +7,21 @@ require 'optparse'
 require 'logger'
 require 'macaddr'
 
-Version = "1.1.0"
+Version = "1.2.0"
 
-module TemperatureSensors
-  class Base
-    def value
-      raise NotImplementedError, "You must implement #{self.class}##{__method__}"
-    end
-  end
-
-  class Dummy < Base
+class TemperatureSensors
+  class Dummy
     def value
       return (20.0 + rand*10).round(2)
     end
-  end #class Dummy
+  end
 
-  class LM75 < Base
+  class LM75
     def initialize(bus=3, addr=48)
       @sysfs = sprintf("/sys/class/i2c-dev/i2c-%d/device/%d-%04d/temp1_input",
                        bus, bus, addr)
+      return if FileTest.readable? @sysfs
+      raise DeviceNotFound, "Unable to read #{@sysfs}"
     end
 
     def value
@@ -33,8 +29,41 @@ module TemperatureSensors
         (f.read.to_f/1000).round(2)
       end
     end
-  end #class LM75
-end #module TemperatureSensors
+  end
+
+  class BMIC
+    def initialize
+      @sysfs = "/sys/class/thermal/thermal_zone0/temp"
+      return if FileTest.readable? @sysfs
+      raise DeviceNotFound, "Unable to read #{@sysfs}"
+    end
+
+    def value
+      File.open(@sysfs, "r") do |f|
+        (f.read.to_f/1000).round(2)
+      end
+    end
+  end
+
+  class DeviceNotFound < RuntimeError; end
+
+  def initialize
+    [LM75, BMIC, Dummy].each do |c|
+      begin
+        o = c.new
+      rescue DeviceNotFound => e
+        #p e # uncomment this to debug
+        next
+      end
+      @adopter = o
+      return
+    end
+  end
+
+  def value
+    @adopter.value
+  end
+end
 
 module GPS
   class Base
@@ -99,7 +128,7 @@ logger.info("uid: #{uid}")
 logger.info("top page: #{config["host"]}")
 logger.info("personal page: #{config["host"]}/cockpit?uid=#{uid}")
 
-temp = TemperatureSensors::LM75.new
+temp = TemperatureSensors.new
 gps = GPS::Dummy.new
 logger.info("Searching GPS...")
 gps.update()
