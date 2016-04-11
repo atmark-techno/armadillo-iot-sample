@@ -6,7 +6,7 @@ require 'json'
 require 'optparse'
 require 'logger'
 
-Version = "1.2.0"
+Version = "1.2.1"
 SYS_ETH0_MACADDR = "/sys/class/net/eth0/address"
 
 class TemperatureSensors
