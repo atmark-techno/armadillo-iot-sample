@@ -5,9 +5,9 @@ require 'pusher-client'
 require 'json'
 require 'optparse'
 require 'logger'
-require 'macaddr'
 
-Version = "1.2.0"
+Version = "1.2.1"
+SYS_ETH0_MACADDR = "/sys/class/net/eth0/address"
 
 class TemperatureSensors
   class Dummy
@@ -122,7 +122,13 @@ rescue => e
   logger.error("config file parse failed: #{e.message}")
   exit 1
 end
-uid = Mac.addr.gsub(':', '')
+
+if File.readable?(SYS_ETH0_MACADDR)
+  uid = File.read(SYS_ETH0_MACADDR).chomp.gsub(':','')
+else
+  logger.warn("Unable to get MAC Address from #{SYS_ETH0_MACADDR}: Using random value instead")
+  uid = SecureRandom.hex(6)
+end
 
 logger.info("uid: #{uid}")
 logger.info("top page: #{config["host"]}")
@@ -151,7 +157,7 @@ site = RestClient::Resource.new(config["host"],
 begin
   loops = 0
   loop do
-    break if (0 <= OPTS[:times]) && (OPTS[:times] <= loops) 
+    break if (0 <= OPTS[:times]) && (OPTS[:times] <= loops)
 
     sleep OPTS[:interval]
 
