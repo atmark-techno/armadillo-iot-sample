@@ -157,7 +157,7 @@ site = RestClient::Resource.new(config["host"],
 begin
   loops = 0
   loop do
-    break if (0 <= OPTS[:times]) && (OPTS[:times] <= loops) 
+    break if (0 <= OPTS[:times]) && (OPTS[:times] <= loops)
 
     sleep OPTS[:interval]
 
