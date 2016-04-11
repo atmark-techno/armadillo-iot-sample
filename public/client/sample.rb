@@ -5,9 +5,9 @@ require 'pusher-client'
 require 'json'
 require 'optparse'
 require 'logger'
-require 'macaddr'
 
-Version = "1.2.0"
+Version = "1.2.1"
+SYSFS_ADDR = "/sys/class/net/eth0/address"
 
 class TemperatureSensors
   class Dummy
@@ -122,7 +122,13 @@ rescue => e
   logger.error("config file parse failed: #{e.message}")
   exit 1
 end
-uid = Mac.addr.gsub(':', '')
+
+if File.readable?(SYSFS_ADDR)
+  uid = File.read(SYSFS_ADDR).chomp.gsub(':','')
+else
+  logger.warning("Generating uid...")
+  uid = SecureRandom.hex(6)
+end
 
 logger.info("uid: #{uid}")
 logger.info("top page: #{config["host"]}")
